@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace Company.Function
     public static class PostNote
     {
         [Function("PostNote")]
-        [TableOutput("Notes", Connection = "AzureWebJobsStorage")]
+        [TableOutput("Notes", Connection ="AzureWebJobsStorage")]
         public static async Task<TableData> RunAsync([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req,
             FunctionContext executionContext)
         {
@@ -29,7 +30,7 @@ namespace Company.Function
             return new TableData{
                 Note = json.note,
                 PartitionKey = json.username,
-                RowKey = "1",
+                RowKey = DateTimeOffset.Now.ToUnixTimeSeconds().ToString()
             };
         }
     }
