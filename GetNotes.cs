@@ -13,16 +13,16 @@ namespace Company.Function
         [Function("GetNotes")]
         public static async Task<HttpResponseData> RunAsync([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req,
             FunctionContext executionContext,
-            [TableInput("Notes", Connection ="AzureWebJobsStorage")] TableData[] entries,
+            [TableInput("Notes", Connection ="AzureWebJobsStorage")] NoteEntity[] entries,
             string name)
         {
-            IEnumerable<TableData> userNotes = entries.Where(x => x.PartitionKey == name);
+            IEnumerable<NoteEntity> userNotes = entries.Where(x => x.PartitionKey == name);
             var logger = executionContext.GetLogger("GetNotes");
             logger.LogInformation("C# HTTP trigger function processed a request.");
 
             var response = req.CreateResponse(HttpStatusCode.OK);
 
-            await response.WriteAsJsonAsync<IEnumerable<TableData>>(userNotes);
+            await response.WriteAsJsonAsync<IEnumerable<NoteEntity>>(userNotes);
 
             return response;
         }

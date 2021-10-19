@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
@@ -8,30 +9,29 @@ using Microsoft.Extensions.Logging;
 
 namespace Company.Function
 {
-    public class TableData
-    {
-        public string Note { get; set; }
-        public string PartitionKey { get; set; }
-        public string RowKey { get; set; }
-    }
-    public class NoteData
-    {
-        public string username { get; set; }
-        public string note { get; set; }
-    }
     public static class PostNote
     {
         [Function("PostNote")]
         [TableOutput("Notes", Connection ="AzureWebJobsStorage")]
-        public static async Task<TableData> RunAsync([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req,
-            FunctionContext executionContext)
+        public static async Task<NoteEntity> RunAsync([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route ="postnote/{partitionkey}")] HttpRequestData req,
+            FunctionContext executionContext, [TableInput("Notes", partitionKey:"{partitionkey}", Connection = "AzureWebJobsStorage")] IEnumerable<NoteEntity> noteEntities)
         {
-            NoteData json = await req.ReadFromJsonAsync<NoteData>();
-            return new TableData{
-                Note = json.note,
-                PartitionKey = json.username,
-                RowKey = DateTimeOffset.Now.ToUnixTimeSeconds().ToString()
-            };
+            NoteEntity entity = await req.ReadFromJsonAsync<NoteEntity>();
+
+            if(entity.Version == 0)
+            {
+                entity.Lol = noteEntities.Max(x => x.Lol) + 1;
+            }
+            else
+            {
+                entity.Lol = noteEntities.Max(x => x.Lol);
+            }
+
+            entity.RowKey = Guid.NewGuid().ToString();
+
+            HttpResponseData res = req.CreateResponse(HttpStatusCode.OK);
+            
+            return entity;
         }
     }
 }
