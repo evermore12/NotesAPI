@@ -28,6 +28,7 @@ namespace Company.Function
             }
 
             entity.RowKey = Guid.NewGuid().ToString();
+            entity.Date = DateTimeOffset.Now.ToUnixTimeSeconds();
 
             HttpResponseData res = req.CreateResponse(HttpStatusCode.OK);
             

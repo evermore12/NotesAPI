@@ -1,3 +1,5 @@
+using System;
+
 public class NoteEntity
 {
     public string Note { get; set; }
@@ -5,4 +7,6 @@ public class NoteEntity
     public string RowKey { get; set; }
     public int Lol { get; set; }
     public int Version { get; set; }
+    public long Date { get; set; }
 }
+
